@@ -1,4 +1,4 @@
-name = Open Graph Comment
+name = Open Graph Comments
 description = "Provide open graph in comments."
 package = "Other"
 core = 7.x
