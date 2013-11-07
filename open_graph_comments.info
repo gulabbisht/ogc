@@ -1,8 +1,5 @@
 name = Open Graph Comment
 description = "Provide open graph in comments."
 package = "Other"
-dependencies[] = comment
-version = "7.x-1.0-dev"
 core = 7.x
-
-files[] = ogc.module
+dependencies[] = comment
