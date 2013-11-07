@@ -1,0 +1,84 @@
+<?php
+
+/**
+ * @file
+ * Open Graph Comment primary module file.
+ *
+ * It contains alteration in default comment to add open graph data from url
+ * link added in drupal comments.
+ */
+
+/**
+ * Function to get formatted view with og tags from link.
+ */
+function ogc_display_comment($url) {
+  $sites_html = file_get_contents($url);
+  $html = new DOMDocument();
+  @$html->loadHTML($sites_html);
+  $tags = array();
+  // Get all meta tags and loop through them.
+  foreach ($html->getElementsByTagName('meta') as $meta) {
+    // If the property attribute of the meta tag contains og:.
+    if (strpos($meta->getAttribute('property'), 'og:') !== false) {
+      // Assign the value from content attribute to $meta_og_img
+      $tags[$meta->getAttribute('property')] = $meta->getAttribute('content');
+    }
+  }
+
+  return $tags;
+}
+
+/**
+ * Implements hook_comment_view_alter();
+ */
+function ogc_comment_view_alter(&$build) {
+  $url = '';
+  $title = '';
+  $img = '';
+  $desc = '';
+  $ogc_output = '';
+  $matches = array();
+  
+  $comment_body = $build['#comment']->comment_body['und'][0]['value'];
+  preg_match_all('((https?|ftp|gopher|telnet|file|notes|ms-help):' .
+      '((//)|(\\\\))+[\w\d:#@%/;$()~_?\+-=\\\.&]*)', $comment_body, $matches, PREG_PATTERN_ORDER);
+  foreach ($matches as $value) {
+    // Check if string is valid url or not.
+    if (filter_var($value[0], FILTER_VALIDATE_URL)) {
+      $og_tags = ogc_display_comment($value[0]);
+    }
+  }
+
+  if (isset($og_tags)) {
+    if (isset($og_tags['og:url'])) {
+      $url = $og_tags['og:url'];
+    }
+    if (isset($og_tags['og:title'])) {
+      $title = $og_tags['og:title'];
+    }
+    if (isset($og_tags['og:image'])) {
+      $img = $og_tags['og:image'];
+    }
+    if (isset($og_tags['og:description'])) {
+      $desc = $og_tags['og:description'];
+    }
+    // Get themed output.
+    $ogc_output = theme('ogc_comment_template', array('url' => $url, 'title' => $title, 'img' => $img, 'desc' => $desc));
+  }
+
+  $build['comment_body'][0]['#markup'] = $build['comment_body'][0]['#markup'] . $ogc_output;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function ogc_theme($existing, $type, $theme, $path) {
+  $themes = array(
+    'ogc_comment_template' => array(
+      'template' => 'ogc_comment',
+      'variables' => array('url' => NULL, 'title' => NULL, 'img' => NULL, 'desc' => NULL),
+    ),
+  );
+  return $themes;
+}
+
