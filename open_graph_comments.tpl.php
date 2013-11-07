@@ -3,7 +3,6 @@
 /**
  * @file
  * Theme implementation for open graph comment.
- *
  */
 ?>
 <div>

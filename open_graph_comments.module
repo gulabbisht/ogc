@@ -67,7 +67,7 @@ function open_graph_comments_comment_view_alter(&$build) {
         'url' => $url,
         'title' => $title,
         'img' => $img,
-        'desc' => $desc
+        'desc' => $desc,
       )
     );
   }
@@ -86,7 +86,7 @@ function open_graph_comments_theme($existing, $type, $theme, $path) {
         'url' => NULL,
         'title' => NULL,
         'img' => NULL,
-        'desc' => NULL
+        'desc' => NULL,
       ),
     ),
   );
