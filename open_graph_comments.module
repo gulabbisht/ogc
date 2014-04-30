@@ -10,6 +10,11 @@
 
 /**
  * Function to get formatted view with og tags from link.
+ * 
+ * @param $url
+ *   URL for which open graph meta tags are needed.
+ * @return $tags
+ *   Array of open graph meta tags.
  */
 function open_graph_comments_display_comment($url) {
   $tags = array();
