@@ -140,7 +140,7 @@ function open_graph_comments_theme($existing, $type, $theme, $path) {
 }
 
 /**
- * Implements hook_form_FORM_ID_alter().
+ * Implements hook_form_BASE_FORM_ID_alter().
  */
 function open_graph_comments_form_node_type_form_alter(&$form, &$form_state) {
   // Set open graph setting to content types.
