@@ -13,6 +13,7 @@
  *
  * @param string $url
  *   URL for which open graph meta tags are needed.
+ *
  * @return array
  *   Array of open graph meta tags.
  */
@@ -104,7 +105,7 @@ function open_graph_comments_comment_view_alter(&$build) {
  * @param string $url
  *   URL to get open graph data.
  * @param int $cid
- *   cid of comment.
+ *   Id of comment.
  * @param string $lid
  *   Language code.
  *
@@ -174,8 +175,8 @@ function open_graph_comments_comment_update($comment) {
   $open_graph_status = variable_get('open_graph_comments_' . $comment_node_type, FALSE);
   if ($open_graph_status) {
     // Check if comment's open graph data already set.
-    if ($cache = cache_get('open_graph_comments_' . $comment->cid . '_' . $comment->language)) {
-      $og_tags = $cache->data;
+    $cache = cache_get('open_graph_comments_' . $comment->cid . '_' . $comment->language);
+    if ($cache) {
       // Delete comment cache data.
       cache_clear_all($cache->cid, 'cache');
     }
