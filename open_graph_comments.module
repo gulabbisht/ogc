@@ -29,10 +29,10 @@ function open_graph_comments_display_comment($url) {
 
     // Get all meta tags and loop through them.
     foreach ($html->getElementsByTagName('meta') as $meta) {
-      // If the property attribute of the meta tag contains og:.
+      // If the property attribute of the meta tag contains og: then save
+      // contentit to tags variable.
       if (strpos($meta->getAttribute('property'), 'og:') !== FALSE) {
-        // Assign the value from content attribute to $meta_og_img.
-        $tags[$meta->getAttribute('property')] = $meta->getAttribute('content');
+        $tags[$meta->getAttribute('property')] = check_plain($meta->getAttribute('content'));
       }
     }
   }
@@ -85,17 +85,15 @@ function open_graph_comments_comment_view_alter(&$build) {
       if (isset($og_tags['og:description'])) {
         $desc = $og_tags['og:description'];
       }
-      // Get themed output.
-      $ogc_output = theme('open_graph_comments_template', array(
-          'url' => check_plain($url),
-          'title' => check_plain($title),
-          'img' => check_plain($img),
-          'desc' => check_plain($desc),
-        )
+
+      $build['ogc'] = array(
+        '#theme' => 'open_graph_comments_template',
+        '#url' => check_plain($url),
+        '#title' => check_plain($title),
+        '#img' => check_plain($img),
+        '#desc' => check_plain($desc),
       );
     }
-
-    $build['comment_body'][0]['#markup'] .= $ogc_output;
   }
 }
 
