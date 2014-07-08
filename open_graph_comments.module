@@ -83,10 +83,6 @@ function open_graph_comments_comment_view_alter(&$build) {
 
     // Get variables from opengraph metatags.
     $meta_array = array();
-    $meta_array['url'] = '';
-    $meta_array['title'] = '';
-    $meta_array['img'] = '';
-    $meta_array['desc'] = '';
     if (isset($og_tags) && !empty($og_tags)) {
       if (isset($og_tags['og:url'])) {
         $meta_array['url'] = check_plain($og_tags['og:url']);
