@@ -30,7 +30,7 @@ function open_graph_comments_display_comment($url) {
     // Get all meta tags and loop through them.
     foreach ($html->getElementsByTagName('meta') as $meta) {
       // If the property attribute of the meta tag contains og: then save
-      // contentit to tags variable.
+      // content to tags variable.
       if (strpos($meta->getAttribute('property'), 'og:') !== FALSE) {
         $tags[$meta->getAttribute('property')] = check_plain($meta->getAttribute('content'));
       }
