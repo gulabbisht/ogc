@@ -52,7 +52,6 @@ function open_graph_comments_comment_view_alter(&$build) {
     $title = '';
     $img = '';
     $desc = '';
-    $ogc_output = '';
     $matches = array();
     $build['#attached']['css'] = array(
       drupal_get_path('module', 'open_graph_comments') . '/css/open_graph_comments.css',
