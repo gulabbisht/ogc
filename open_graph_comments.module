@@ -49,18 +49,10 @@ function open_graph_comments_comment_view_alter(&$build) {
   // comments settings.
   if ($open_graph_status) {
     $matches = array();
-    // print_r($build);die;
     $build['#attached']['css'] = array(
       drupal_get_path('module', 'open_graph_comments') . '/css/open_graph_comments.css',
     );
 
-    // Get comment body field language. Cache field translation information as
-    // it will be same of all the comments in the node.
-    $field_trans = &drupal_static(__FUNCTION__);
-    if (!isset($field_trans)) {
-      $field_info = field_info_field('comment_body');
-      $field_trans = field_is_translatable('comment', $field_info);
-    }
     // Set comment body field language to comment language if field translation
     // is on otherwise set it as LANGUAGE_NONE.
     $langcode = LANGUAGE_NONE;
