@@ -70,7 +70,7 @@ function open_graph_comments_comment_view_alter(&$build) {
     // Check if string is valid url or not.
     if (isset($matches[0]) && filter_var($matches[0], FILTER_VALIDATE_URL)) {
       // Get open graph data from cache, if not then set cache.
-      $og_tags = open_graph_comments_cache_data($matches[0], $build['#comment']->cid, $langcode);
+      $og_tags = open_graph_comments_cache_data($matches[0], $build['#comment']->cid);
     }
 
     // Get variables from opengraph metatags.
