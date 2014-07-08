@@ -57,7 +57,21 @@ function open_graph_comments_comment_view_alter(&$build) {
       drupal_get_path('module', 'open_graph_comments') . '/css/open_graph_comments.css',
     );
 
-    $comment_body = $build['#comment']->comment_body[LANGUAGE_NONE][0]['value'];
+    // Get comment body field language. Cache field translation information as
+    // it will be same of all the comments in the node.
+    $field_trans = &drupal_static(__FUNCTION__);
+    if (!isset($field_trans)) {
+      $field_info = field_info_field('comment_body');
+      $field_trans = field_is_translatable('comment', $field_info);
+    }
+    // Set comment body field language to comment language if field translation
+    // is on otherwise set it as LANGUAGE_NONE.
+    $langcode = LANGUAGE_NONE;
+    if ($field_trans) {
+      $langcode = $build['#comment']->language;
+    }
+    $comment_body = $build['#comment']->comment_body[$langcode][0]['value'];
+
     // The Regular Expression filter.
     $reg_exurl = "/(http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?/";
 
@@ -87,10 +101,12 @@ function open_graph_comments_comment_view_alter(&$build) {
 
       $build['ogc'] = array(
         '#theme' => 'open_graph_comments_template',
-        '#url' => check_plain($url),
-        '#title' => check_plain($title),
-        '#img' => check_plain($img),
-        '#desc' => check_plain($desc),
+        '#og_data' => array(
+          'url' => check_plain($url),
+          'title' => check_plain($title),
+          'img' => check_plain($img),
+          'desc' => check_plain($desc),
+        ),
       );
     }
   }
@@ -126,18 +142,14 @@ function open_graph_comments_cache_data($url, $cid, $lid) {
  * Implements hook_theme().
  */
 function open_graph_comments_theme($existing, $type, $theme, $path) {
-  $themes = array(
+  return array(
     'open_graph_comments_template' => array(
       'template' => 'open_graph_comments',
       'variables' => array(
-        'url' => NULL,
-        'title' => NULL,
-        'img' => NULL,
-        'desc' => NULL,
+        'og_data' => NULL,
       ),
     ),
   );
-  return $themes;
 }
 
 /**
@@ -148,8 +160,8 @@ function open_graph_comments_form_node_type_form_alter(&$form, &$form_state) {
   if (isset($form['type'])) {
     $form['comment']['open_graph_comments'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Enable open graph.'),
-      '#description' => t('Display open graph for link provided in comments.'),
+      '#title' => t('Enable open graph comments'),
+      '#description' => t('Display open graph data of link provided in comments.'),
       '#default_value' => variable_get('open_graph_comments_' . $form['#node_type']->type, FALSE),
     );
   }
@@ -161,7 +173,6 @@ function open_graph_comments_form_node_type_form_alter(&$form, &$form_state) {
 function open_graph_comments_comment_update($comment) {
   // Get comment's node type to find whether open graph comments setting is
   // enabled or not.
-  $comment_node_type = '';
   $query = db_select('node', 'n');
   $query->addField('n', 'type');
   $query->condition('n.nid', $comment->nid, '=');
