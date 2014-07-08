@@ -48,11 +48,8 @@ function open_graph_comments_comment_view_alter(&$build) {
   // Check if open graph comments functionality is enabled in content type's
   // comments settings.
   if ($open_graph_status) {
-    $url = '';
-    $title = '';
-    $img = '';
-    $desc = '';
     $matches = array();
+    // print_r($build);die;
     $build['#attached']['css'] = array(
       drupal_get_path('module', 'open_graph_comments') . '/css/open_graph_comments.css',
     );
@@ -67,7 +64,7 @@ function open_graph_comments_comment_view_alter(&$build) {
     // Set comment body field language to comment language if field translation
     // is on otherwise set it as LANGUAGE_NONE.
     $langcode = LANGUAGE_NONE;
-    if ($field_trans) {
+    if ($build['comment_body']['#field_translatable']) {
       $langcode = $build['#comment']->language;
     }
     $comment_body = $build['#comment']->comment_body[$langcode][0]['value'];
@@ -81,32 +78,32 @@ function open_graph_comments_comment_view_alter(&$build) {
     // Check if string is valid url or not.
     if (isset($matches[0]) && filter_var($matches[0], FILTER_VALIDATE_URL)) {
       // Get open graph data from cache, if not then set cache.
-      $og_tags = open_graph_comments_cache_data($matches[0], $build['#comment']->cid, $build['#comment']->language);
+      $og_tags = open_graph_comments_cache_data($matches[0], $build['#comment']->cid, $langcode);
     }
 
     // Get variables from opengraph metatags.
+    $meta_array = array();
+    $meta_array['url'] = '';
+    $meta_array['title'] = '';
+    $meta_array['img'] = '';
+    $meta_array['desc'] = '';
     if (isset($og_tags) && !empty($og_tags)) {
       if (isset($og_tags['og:url'])) {
-        $url = $og_tags['og:url'];
+        $meta_array['url'] = check_plain($og_tags['og:url']);
       }
       if (isset($og_tags['og:title'])) {
-        $title = $og_tags['og:title'];
+        $meta_array['title'] = check_plain($og_tags['og:title']);
       }
       if (isset($og_tags['og:image'])) {
-        $img = $og_tags['og:image'];
+        $meta_array['img'] = check_plain($og_tags['og:image']);
       }
       if (isset($og_tags['og:description'])) {
-        $desc = $og_tags['og:description'];
+        $meta_array['desc'] = check_plain($og_tags['og:description']);
       }
 
       $build['ogc'] = array(
         '#theme' => 'open_graph_comments_template',
-        '#og_data' => array(
-          'url' => check_plain($url),
-          'title' => check_plain($title),
-          'img' => check_plain($img),
-          'desc' => check_plain($desc),
-        ),
+        '#og_data' => $meta_array,
       );
     }
   }
@@ -119,21 +116,19 @@ function open_graph_comments_comment_view_alter(&$build) {
  *   URL to get open graph data.
  * @param int $cid
  *   Id of comment.
- * @param string $lid
- *   Language code.
  *
  * @return array
  *   Open graph data.
  */
-function open_graph_comments_cache_data($url, $cid, $lid) {
+function open_graph_comments_cache_data($url, $cid) {
   $og_tags = array();
   // Cache open graph data for particular comment.
-  if ($cache = cache_get('open_graph_comments_' . $cid . '_' . $lid)) {
+  if ($cache = cache_get('open_graph_comments_' . $cid)) {
     $og_tags = $cache->data;
   }
   else {
     $og_tags = open_graph_comments_display_comment($url);
-    cache_set('open_graph_comments_' . $cid . '_' . $lid, $og_tags, 'cache');
+    cache_set('open_graph_comments_' . $cid, $og_tags, 'cache');
   }
   return $og_tags;
 }
