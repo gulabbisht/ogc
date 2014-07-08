@@ -166,7 +166,7 @@ function open_graph_comments_comment_update($comment) {
   $open_graph_status = variable_get('open_graph_comments_' . $comment_node_type, FALSE);
   if ($open_graph_status) {
     // Check if comment's open graph data already set.
-    $cache = cache_get('open_graph_comments_' . $comment->cid . '_' . $comment->language);
+    $cache = cache_get('open_graph_comments_' . $comment->cid);
     if ($cache) {
       // Delete comment cache data.
       cache_clear_all($cache->cid, 'cache');
