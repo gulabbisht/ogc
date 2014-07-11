@@ -61,14 +61,11 @@ function open_graph_comments_comment_view_alter(&$build) {
     }
     $comment_body = $build['#comment']->comment_body[$langcode][0]['value'];
 
-    // The Regular Expression filter.
-    $reg_exurl = "/(http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?/";
-
     // Check if there is a url in the text.
-    preg_match($reg_exurl, $comment_body, $matches);
+    preg_match("/(http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?/", $comment_body, $matches);
 
     // Check if string is valid url or not.
-    if (isset($matches[0]) && filter_var($matches[0], FILTER_VALIDATE_URL)) {
+    if (isset($matches[0]) && valid_url($matches[0])) {
       // Get open graph data from cache, if not then set cache.
       $og_tags = open_graph_comments_cache_data($matches[0], $build['#comment']->cid);
     }
