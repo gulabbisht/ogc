@@ -17,7 +17,7 @@
  * @return array
  *   Array of open graph meta tags.
  */
-function open_graph_comments_display_comment($url) {
+function open_graph_comments_get_og_tags($url) {
   $tags = array();
   $request_data = drupal_http_request($url);
   // Check for positive response code.
@@ -77,13 +77,13 @@ function open_graph_comments_comment_view_alter(&$build) {
     $meta_array = array();
     if (isset($og_tags) && !empty($og_tags)) {
       if (isset($og_tags['og:url'])) {
-        $meta_array['url'] = check_plain($og_tags['og:url']);
+        $meta_array['url'] = check_url($og_tags['og:url']);
       }
       if (isset($og_tags['og:title'])) {
         $meta_array['title'] = check_plain($og_tags['og:title']);
       }
       if (isset($og_tags['og:image'])) {
-        $meta_array['img'] = check_plain($og_tags['og:image']);
+        $meta_array['img'] = check_url($og_tags['og:image']);
       }
       if (isset($og_tags['og:description'])) {
         $meta_array['desc'] = check_plain($og_tags['og:description']);
@@ -115,7 +115,7 @@ function open_graph_comments_cache_data($url, $cid) {
     $og_tags = $cache->data;
   }
   else {
-    $og_tags = open_graph_comments_display_comment($url);
+    $og_tags = open_graph_comments_get_og_tags($url);
     cache_set('open_graph_comments_' . $cid, $og_tags, 'cache');
   }
   return $og_tags;
