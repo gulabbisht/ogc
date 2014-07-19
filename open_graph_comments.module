@@ -170,3 +170,14 @@ function open_graph_comments_comment_update($comment) {
     }
   }
 }
+
+/**
+ * Implements hook_node_type_delete().
+ */
+function open_graph_comments_node_type_delete($info) {
+  // Delete open graph comments content type variable on delete of content type.
+  $content_type_status = variable_get('open_graph_comments_' . $info->type, FALSE);
+  if ($content_type_status) {
+    variable_del('open_graph_comments_' . $info->type);
+  }
+}
