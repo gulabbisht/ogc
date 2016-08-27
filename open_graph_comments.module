@@ -17,6 +17,21 @@
  * @return array
  *   Array of open graph meta tags.
  */
+ 
+ 
+ 
+/**
+ * Implements hook_theme().
+ */
+	function open_graph_comments_theme($existing, $type, $theme, $path) {
+		return [
+			'open_graph_comments_template' => [
+				'variables' => ['og_data' => NULL,],
+				'template' => 'open-graph-comments',
+			],
+		];
+	}
+
 //function open_graph_comments_get_og_tags($url) {
 //  $tags = array();
 //  $request_data = drupal_http_request($url);
@@ -181,3 +196,4 @@
 //    variable_del('open_graph_comments_' . $info->type);
 //  }
 //}
+7
