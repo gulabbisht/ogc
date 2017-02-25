@@ -17,9 +17,9 @@
  * @return array
  *   Array of open graph meta tags.
  */
- 
- 
- 
+
+
+
 /**
  * Implements hook_theme().
  */
@@ -196,4 +196,3 @@ function open_graph_comments_theme($existing, $type, $theme, $path) {
 //    variable_del('open_graph_comments_' . $info->type);
 //  }
 //}
-7
