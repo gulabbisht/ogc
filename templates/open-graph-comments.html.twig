@@ -1,0 +1,15 @@
+<div class="open-graph-comment-outer">
+  {% if og_data.img %}
+    <div class="open-graph-comment-img">
+      <img src='{{ og_data.img }}'>
+    </div>
+  {% endif %}
+  {% if $og_data.url && $og_data.title %}
+    <h3 class="open-graph-comment-title">
+      <a href="{{ og_data.url }}" target="_blank">{{ og_data.title }}</a>
+    </h3>
+  {% endif %}
+  {% if og_data.desc %}
+    <p class="open-graph-comment-desc">{{ og_data.desc }}</p>
+  {% endif %}
+</div>
