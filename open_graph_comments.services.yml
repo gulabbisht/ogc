@@ -1,4 +1,4 @@
 services:
-  open_graph_comments.fetch_tags:
-    class: Drupal\open_graph_comments\OGCFetchTags
+  open_graph_comments.service:
+    class: Drupal\open_graph_comments\OGCTagService
     arguments: ['@http_client', '@module_handler', '@logger.factory']

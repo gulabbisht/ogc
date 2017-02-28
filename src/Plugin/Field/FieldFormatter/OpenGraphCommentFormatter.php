@@ -7,8 +7,7 @@ use Drupal\Core\Field\Plugin\Field\FieldFormatter\BasicStringFormatter;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\open_graph_comments\OGCFetchTags;
-use Drupal\Component\Utility\UrlHelper;
+use Drupal\open_graph_comments\OGCTagService;
 
 /**
  * @FieldFormatter(
@@ -22,9 +21,9 @@ use Drupal\Component\Utility\UrlHelper;
 class OpenGraphCommentFormatter extends BasicStringFormatter implements ContainerFactoryPluginInterface {
 
   /**
-   * The open graph comments.
+   * The open graph comment service.
    *
-   * @var \Drupal\open_graph_comments\OGCFetchTags
+   * @var \Drupal\open_graph_comments\OGCTagService
    */
   protected $ogc;
 
@@ -45,10 +44,10 @@ class OpenGraphCommentFormatter extends BasicStringFormatter implements Containe
    *   The view mode.
    * @param array $third_party_settings
    *   Third party settings.
-   * @param \Drupal\open_graph_comments\OGCFetchTags $ogc
+   * @param \Drupal\open_graph_comments\OGCTagService $ogc
    *   The open graph comment service.
    */
-  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, $label, $view_mode, array $third_party_settings, OGCFetchTags $ogc) {
+  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, $label, $view_mode, array $third_party_settings, OGCTagService $ogc) {
     parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $label, $view_mode, $third_party_settings);
     $this->ogc = $ogc;
   }
@@ -65,7 +64,7 @@ class OpenGraphCommentFormatter extends BasicStringFormatter implements Containe
       $configuration['label'],
       $configuration['view_mode'],
       $configuration['third_party_settings'],
-      $container->get('open_graph_comments.fetch_tags')
+      $container->get('open_graph_comments.service')
     );
   }
 
@@ -87,7 +86,7 @@ class OpenGraphCommentFormatter extends BasicStringFormatter implements Containe
         // Get OG tags from the url.
         $og_tags = $this->ogc->getTags($matches[0]);
         // Prepare meta data array for output.
-        $meta_data = $this->prepareMetaData($og_tags);
+        $meta_data = $this->ogc->prepareMetaData($og_tags);
       }
 
       $elements[$delta] = [
@@ -101,33 +100,13 @@ class OpenGraphCommentFormatter extends BasicStringFormatter implements Containe
   }
 
   /**
-   * Prepare meta data array.
-   *
-   * @param array $og_tags
-   *   OG tags.
-   *
-   * @return array
-   *   Meta data array.
+   * {@inheritdoc}
    */
-  protected function prepareMetaData(array $og_tags = []) {
-    $meta_data = [];
-
-    if (!empty($og_tags)) {
-      if (isset($og_tags['og:url'])) {
-        $meta_data['url'] = UrlHelper::filterBadProtocol($og_tags['og:url']);
-      }
-      if (isset($og_tags['og:title'])) {
-        $meta_data['title'] = $og_tags['og:title'];
-      }
-      if (isset($og_tags['og:image'])) {
-        $meta_data['img'] = UrlHelper::filterBadProtocol($og_tags['og:image']);
-      }
-      if (isset($og_tags['og:description'])) {
-        $meta_data['desc'] = $og_tags['og:description'];
-      }
+  public static function isApplicable(FieldDefinitionInterface $field_definition) {
+    // Allow this formatter only for 'comment' entity.
+    if ($field_definition->getTargetEntityTypeId() === 'comment') {
+      return TRUE;
     }
-
-    return $meta_data;
   }
 
 }

@@ -6,8 +6,9 @@ use GuzzleHttp\ClientInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Component\Utility\UrlHelper;
 
-class OGCFetchTags {
+class OGCTagService {
   use StringTranslationTrait;
 
   /**
@@ -91,6 +92,36 @@ class OGCFetchTags {
     $this->moduleHandler->alter('open_graph_comments_tags', $tags, $url);
 
     return $tags;
+  }
+
+  /**
+   * Prepare meta data array.
+   *
+   * @param array $og_tags
+   *   OG tags.
+   *
+   * @return array
+   *   Meta data array.
+   */
+  public function prepareMetaData(array $og_tags = []) {
+    $meta_data = [];
+
+    if (!empty($og_tags)) {
+      if (isset($og_tags['og:url'])) {
+        $meta_data['url'] = UrlHelper::filterBadProtocol($og_tags['og:url']);
+      }
+      if (isset($og_tags['og:title'])) {
+        $meta_data['title'] = $og_tags['og:title'];
+      }
+      if (isset($og_tags['og:image'])) {
+        $meta_data['img'] = UrlHelper::filterBadProtocol($og_tags['og:image']);
+      }
+      if (isset($og_tags['og:description'])) {
+        $meta_data['desc'] = $og_tags['og:description'];
+      }
+    }
+
+    return $meta_data;
   }
 
 }
