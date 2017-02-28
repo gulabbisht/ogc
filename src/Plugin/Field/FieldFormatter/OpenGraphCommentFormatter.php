@@ -103,7 +103,6 @@ class OpenGraphCommentFormatter extends BasicStringFormatter implements Containe
    * {@inheritdoc}
    */
   public static function isApplicable(FieldDefinitionInterface $field_definition) {
-    // Allow this formatter only for 'comment' entity.
     if ($field_definition->getTargetEntityTypeId() === 'comment') {
       return TRUE;
     }
