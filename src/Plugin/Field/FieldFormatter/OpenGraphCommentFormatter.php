@@ -6,8 +6,9 @@ use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\Plugin\Field\FieldFormatter\BasicStringFormatter;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use \Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\open_graph_comments\OGCFetchTags;
+use Drupal\Component\Utility\UrlHelper;
 
 /**
  * @FieldFormatter(
@@ -72,9 +73,57 @@ class OpenGraphCommentFormatter extends BasicStringFormatter implements Containe
    * {@inheritdoc}
    */
   public function viewElements(FieldItemListInterface $items, $langcode) {
-    $elements = parent::viewElements($items, $langcode);
+    $elements = [];
+
+    foreach ($items as $delta => $item) {
+      $value = $item->value;
+
+      // Match/Filter the url.
+      preg_match("/(http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?/", $value, $matches);
+
+      if (isset($matches[0])) {
+        $og_tags = $this->ogc->getTags($matches[0]);
+        $meta_data = $this->prepareMetaData($og_tags);
+      }
+
+      $elements[$delta] = [
+        '#theme' => 'open_graph_comments_template',
+        '#value' => $value,
+        '#meta_data' => $meta_data,
+      ];
+    }
 
     return $elements;
+  }
+
+  /**
+   * Prepare meta data array.
+   *
+   * @param array $og_tags
+   *   OG tags.
+   *
+   * @return array
+   *   Meta data array.
+   */
+  protected function prepareMetaData(array $og_tags = []) {
+    $meta_array = [];
+
+    if (!empty($og_tags)) {
+      if (isset($og_tags['og:url'])) {
+        $meta_array['url'] = UrlHelper::filterBadProtocol($og_tags['og:url']);
+      }
+      if (isset($og_tags['og:title'])) {
+        $meta_array['title'] = $og_tags['og:title'];
+      }
+      if (isset($og_tags['og:image'])) {
+        $meta_array['img'] = UrlHelper::filterBadProtocol($og_tags['og:image']);
+      }
+      if (isset($og_tags['og:description'])) {
+        $meta_array['desc'] = $og_tags['og:description'];
+      }
+    }
+
+    return $meta_array;
   }
 
 }
