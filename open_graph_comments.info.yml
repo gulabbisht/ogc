@@ -1,5 +1,5 @@
 name: Open Graph Comments
-description: Provide open graph in comments.
+description: Provides field display formatter for comment text field.
 core: 8.x
 type: module
 version: VERSION
