@@ -3,7 +3,6 @@
 namespace Drupal\open_graph_comments;
 
 use GuzzleHttp\ClientInterface;
-use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Component\Utility\UrlHelper;
@@ -19,13 +18,6 @@ class OGCTagService {
   protected $httpClient;
 
   /**
-   * The module handler.
-   *
-   * @var \Drupal\Core\Extension\ModuleHandlerInterface
-   */
-  protected $moduleHandler;
-
-  /**
    * The logger factory.
    *
    * @var \Drupal\Core\Logger\LoggerChannelFactoryInterface
@@ -37,14 +29,11 @@ class OGCTagService {
    *
    * @param \GuzzleHttp\ClientInterface $client
    *   The http client.
-   * @param  \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
-   *   The module handler.
    * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger
    *   The logger factory.
    */
-  public function __construct(ClientInterface $client, ModuleHandlerInterface $module_handler, LoggerChannelFactoryInterface $logger) {
+  public function __construct(ClientInterface $client, LoggerChannelFactoryInterface $logger) {
     $this->httpClient = $client;
-    $this->moduleHandler = $module_handler;
     $this->logger = $logger;
   }
 
@@ -87,9 +76,6 @@ class OGCTagService {
       // Log error if any.
       $this->logger->get('open_graph_comments')->error('Error: ' . $e->getMessage() . ' URL: ' . $url);
     }
-
-    // Allows user to alter tags before sending.
-    $this->moduleHandler->alter('open_graph_comments_tags', $tags, $url);
 
     return $tags;
   }

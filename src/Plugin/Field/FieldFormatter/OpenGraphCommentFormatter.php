@@ -8,6 +8,7 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\open_graph_comments\OGCTagService;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 
 /**
  * @FieldFormatter(
@@ -19,6 +20,13 @@ use Drupal\open_graph_comments\OGCTagService;
  * )
  */
 class OpenGraphCommentFormatter extends BasicStringFormatter implements ContainerFactoryPluginInterface {
+
+  /**
+   * The module handler.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
 
   /**
    * The open graph comment service.
@@ -44,11 +52,14 @@ class OpenGraphCommentFormatter extends BasicStringFormatter implements Containe
    *   The view mode.
    * @param array $third_party_settings
    *   Third party settings.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   The module handler.
    * @param \Drupal\open_graph_comments\OGCTagService $ogc
    *   The open graph comment service.
    */
-  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, $label, $view_mode, array $third_party_settings, OGCTagService $ogc) {
+  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, $label, $view_mode, array $third_party_settings, ModuleHandlerInterface $module_handler, OGCTagService $ogc) {
     parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $label, $view_mode, $third_party_settings);
+    $this->moduleHandler = $module_handler;
     $this->ogc = $ogc;
   }
 
@@ -64,6 +75,7 @@ class OpenGraphCommentFormatter extends BasicStringFormatter implements Containe
       $configuration['label'],
       $configuration['view_mode'],
       $configuration['third_party_settings'],
+      $container->get('module_handler'),
       $container->get('open_graph_comments.service')
     );
   }
@@ -80,19 +92,28 @@ class OpenGraphCommentFormatter extends BasicStringFormatter implements Containe
       // Match and filter the url from the comment.
       preg_match("/(http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?/", $value, $matches);
 
-      $meta_data = [];
+      // Alterable data set which can be modified in alter hooks.
+      $alterable_data = [
+        'value' => $value,
+        'meta_data' => [],
+        'theme' => 'open_graph_comments_template',
+        'og_tags' => [],
+      ];
 
       if (isset($matches[0])) {
         // Get OG tags from the url.
-        $og_tags = $this->ogc->getTags($matches[0]);
+        $alterable_data['og_tags'] = $this->ogc->getTags($matches[0]);
         // Prepare meta data array for output.
-        $meta_data = $this->ogc->prepareMetaData($og_tags);
+        $alterable_data['meta_data'] = $this->ogc->prepareMetaData($alterable_data['og_tags']);
+
+        // Allow other modules to alter/modify/add tags.
+        $this->moduleHandler->alter('open_graph_comments_tags', $alterable_data, $matches[0]);
       }
 
       $elements[$delta] = [
-        '#theme' => 'open_graph_comments_template',
-        '#value' => $value,
-        '#meta_data' => $meta_data,
+        '#theme' => $alterable_data['theme'],
+        '#value' => $alterable_data['value'],
+        '#meta_data' => $alterable_data['meta_data'],
       ];
     }
 
