@@ -2,3 +2,5 @@ name: Open Graph Comments
 description: Provide open graph in comments.
 core: 8.x
 type: module
+dependencies:
+  - field
