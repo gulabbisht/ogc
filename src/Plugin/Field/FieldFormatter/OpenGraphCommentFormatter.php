@@ -15,7 +15,8 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
  *   id = "open_graph_comments",
  *   label = @Translation("Open graph comments"),
  *   field_types = {
- *     "string_long"
+ *     "string_long",
+ *     "text_long"
  *   }
  * )
  */
@@ -90,7 +91,7 @@ class OpenGraphCommentFormatter extends BasicStringFormatter implements Containe
       $value = $item->value;
 
       // Match and filter the url from the comment.
-      preg_match("/(http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?/", $value, $matches);
+      preg_match("/(http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?/", strip_tags($value), $matches);
 
       // Alterable data set which can be modified in alter hooks.
       $alterable_data = [
